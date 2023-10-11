@@ -130,7 +130,7 @@ export default class AssesmentsController {
         },
         {
           sheet: correctionSheet,
-          point: (userPoint / totalPoint) * 100,
+          point: Math.ceil((userPoint / totalPoint) * 100),
         },
         {
           client: trx,
