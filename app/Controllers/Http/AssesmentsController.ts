@@ -130,7 +130,7 @@ export default class AssesmentsController {
         },
         {
           sheet: correctionSheet,
-          point: Math.ceil((userPoint / totalPoint) * 100),
+          point: Math.round((userPoint / totalPoint) * 100),
         },
         {
           client: trx,
@@ -139,5 +139,45 @@ export default class AssesmentsController {
 
       return work.serialize()
     })
+  }
+
+  public async index({ request }: HttpContextContract) {
+    const { page = 1 } = await request.validate({
+      schema: schema.create({
+        page: schema.number.optional(),
+      }),
+    })
+
+    const limit = 20
+    const offset = (page - 1) * limit
+
+    const assesmentsQuery = Assesment.query()
+
+    const assesmentsCount = await assesmentsQuery.clone().count('* as total')
+
+    const assesments = await assesmentsQuery
+      .clone()
+      .withCount('participants')
+      .offset(offset)
+      .limit(limit)
+
+    return {
+      page_count: Math.ceil(Number(assesmentsCount[0].$extras.total) / limit),
+      rows: assesments.map((assesment) => ({
+        ...assesment.serialize(),
+        participants_count: Number(assesment.$extras.participants_count),
+      })),
+    }
+  }
+
+  public async show({ params }: HttpContextContract) {
+    const assesment = await Assesment.query()
+      .where('assesments.id', params.id)
+      .preload('works', (query) => {
+        query.preload('user')
+      })
+      .firstOrFail()
+
+    return assesment.serialize()
   }
 }

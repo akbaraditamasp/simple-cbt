@@ -74,4 +74,19 @@ test.group('02 assestment', () => {
 
     response.assertStatus(200)
   })
+
+  test('Assesment index', async ({ client }) => {
+    const response = await client.get('/api/assesment')
+
+    response.assertStatus(200)
+  })
+
+  test('Assesment show', async ({ client, assert }) => {
+    const assesment = await Assesment.first()
+    assert.isTrue(Boolean(assesment))
+
+    const response = await client.get('/api/assesment')
+
+    response.assertStatus(200)
+  })
 })

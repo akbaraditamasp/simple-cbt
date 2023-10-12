@@ -28,6 +28,8 @@ Route.group(() => {
   Route.group(() => {
     Route.get('/code/:code', 'AssesmentsController.getByCode').middleware('auth:api')
     Route.post('/:id/work', 'AssesmentsController.storeSheet').middleware('auth:api')
+    Route.get('/:id', 'AssesmentsController.show')
     Route.post('/', 'AssesmentsController.store')
+    Route.get('/', 'AssesmentsController.index')
   }).prefix('/assesment')
 }).prefix('/api')
