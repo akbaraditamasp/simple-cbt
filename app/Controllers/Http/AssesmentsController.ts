@@ -171,13 +171,23 @@ export default class AssesmentsController {
   }
 
   public async show({ params }: HttpContextContract) {
-    const assesment = await Assesment.query()
-      .where('assesments.id', params.id)
-      .preload('works', (query) => {
-        query.preload('user')
+    const assesment = await Assesment.query().where('assesments.id', params.id).firstOrFail()
+    const participants = await User.query()
+      .whereHas('assesments', (query) => {
+        query.where('assesments.id', assesment.id)
       })
-      .firstOrFail()
+      .preload('works', (query) => {
+        query.where('works.assesment_id', assesment.id)
+      })
+      .orderBy('users.created_at', 'asc')
 
-    return assesment.serialize()
+    return {
+      ...assesment.serialize(),
+      works: participants.map((user) => ({
+        ...user.serialize(),
+        works: undefined,
+        work: user.works.shift() || null,
+      })),
+    }
   }
 }
